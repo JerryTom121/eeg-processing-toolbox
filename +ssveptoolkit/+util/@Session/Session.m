@@ -269,6 +269,48 @@ classdef Session < handle
             end
         end
         
+        function S = loadSubjectSessionTest(S,experiment,subject,session)
+            %loads all trials for a specific session
+            %
+            %Example:
+            %   session.loadSubjectSession(1,2);
+            %loads the 2nd session of the 1st subject
+            %
+            if(experiment==3)
+                S.loadEpocData(experiment,subject,session);
+            else
+                load(S.sessions{experiment,subject,session});
+
+                signalnew = eval('eeg');
+                [~,n] = size(DIN_1);
+                l = DIN_1{4,n};
+                signalnew = zeros(257,l+2000);
+                for i=1:n
+                    sample = DIN_1(4,i);
+                    if(strcmp(DIN_1(1,i),'D255')==0)
+                        signalnew(:,sample{1}) = 1;
+                    else
+                        signalnew(:,sample{1}) = -1;
+                    end
+                end
+                load filt_IIRChebI;
+                for i=1:257
+                    signalnew(i,:) = filter(Hbp,signalnew(i,:));
+                    signalnew(i,:) = signalnew(i,:)+randn(1,l+2000)./2;
+                end
+                if(exist('labels'))
+                    curTrials = S.split(signalnew, DIN_1,subject,session,labels);
+                else
+                    curTrials = S.split(signalnew, DIN_1, subject,session);
+                end
+                numTrials = length(S.trials) + 1;
+                for i=1:length(curTrials)
+                    S.trials{numTrials} = curTrials{i};
+                    numTrials = numTrials + 1;
+                end
+            end
+        end
+        
         function S = loadSubjectSession(S,experiment,subject,session)
             %loads all trials for a specific session
             %
@@ -293,6 +335,7 @@ classdef Session < handle
                 end
             end
         end
+        
         function S = loadSubject(S,experiment,subject)
             %loads all trials for a specific subject
             %
@@ -391,10 +434,13 @@ classdef Session < handle
             for i=1:numSplits
                 if(nargin>5)
                     trials{i} = ssveptoolkit.util.Trial(signal(:, (ranges(i,1)+S.skipSamples):ranges(i,2)), labels{i}, S.SAMPLING_RATE, subjectid,session,ssveptoolkit.util.Trial.SSVEP);
+                    trials{i}.noiseSignal = signal(:,(ranges(i,1)+S.skipSamples)+1250:ranges(i,2)+1250);
+                    
                     S.subjectids = [S.subjectids subjectid];
                     S.sessionids = [S.sessionids session];
                 else
                     trials{i} = ssveptoolkit.util.Trial(signal(:, (ranges(i,1)+S.skipSamples):ranges(i,2)), freqs(i), S.SAMPLING_RATE, subjectid,session,ssveptoolkit.util.Trial.SSVEP);
+                    trials{i}.noiseSignal = signal(:,(ranges(i,1)+S.skipSamples)+1250:ranges(i,2)+1250);
                     S.subjectids = [S.subjectids subjectid];
                     S.sessionids = [S.sessionids session];
                 end

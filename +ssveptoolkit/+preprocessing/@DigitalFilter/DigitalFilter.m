@@ -19,11 +19,19 @@ classdef DigitalFilter < ssveptoolkit.preprocessing.PreprocessingBase
                 signal = in{i}.signal;
                 [numChannels, ~] = size(signal);
                 for j=1:numChannels
-                    if isa(DF.filt,'dfilt.df2sos') || isa(DF.filt,'dfilt.df2')
+                    if isa(DF.filt,'dfilt.df2sos')
+%                         signal(j,:) = filtfilt(DF.filt.sosMatrix,DF.filt.ScaleValues,signal(j,:));
+                        signal(j,:) = filter(DF.filt,signal(j,:));
+                    elseif isa(DF.filt,'dfilt.df2')
                         signal(j,:) = filter(DF.filt,signal(j,:));
                     elseif isa(DF.filt,'dfilt.dffir')
-                        signal(j,:) = filtfilt(DF.filt.Numerator,1,signal(j,:));
+%                         signal(j,:) = filtfilt(DF.filt.Numerator,1,signal(j,:));
+                        signal(j,:) = filter(DF.filt,signal(j,:));
+                    elseif isa(DF.filt,'digitalFilter')
+                        signal(j,:) = filtfilt(DF.filt,signal(j,:));
                     end
+%                     signal(j,:) = filtfilt(DF.filt.sosMatrix,DF.filt.ScaleValues,signal(j,:));
+%                     signal(j,:) = filtfilt(DF.filt.Numerator,1,signal(j,:));
                 end
                   in{i}.signal = signal;
             end
@@ -46,4 +54,3 @@ classdef DigitalFilter < ssveptoolkit.preprocessing.PreprocessingBase
     end
     
 end
-

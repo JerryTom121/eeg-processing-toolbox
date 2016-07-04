@@ -16,6 +16,7 @@ classdef Trial < handle
         subjectid; %the subject from
         sessionid; %the session id
         type;
+        noiseSignal;
     end
     
     methods (Access = public)

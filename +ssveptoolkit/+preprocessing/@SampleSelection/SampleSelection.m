@@ -46,6 +46,7 @@ classdef SampleSelection < ssveptoolkit.preprocessing.PreprocessingBase
                         disp('Warning: No parameter specified for SampleSelection, using all channels and samples');
                     end
                 end
+                out{i}.noiseSignal = in{i}.noiseSignal;
             end
         end
         

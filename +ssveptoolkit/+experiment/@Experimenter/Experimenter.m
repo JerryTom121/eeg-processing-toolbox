@@ -55,6 +55,7 @@ classdef Experimenter < handle
             for i=1:length(E.session.trials)
                 trials{i} = ssveptoolkit.util.Trial(E.session.trials{i}.signal,...
                             E.session.trials{i}.label,E.session.trials{i}.samplingRate,E.session.trials{i}.subjectid,E.session.trials{i}.sessionid,E.session.trials{i}.type);
+                trials{i}.noiseSignal = E.session.trials{i}.noiseSignal;
             end
             if ~isempty(E.preprocessing)
                 for i=1:length(E.preprocessing)

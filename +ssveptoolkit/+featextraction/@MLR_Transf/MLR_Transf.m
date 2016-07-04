@@ -34,8 +34,28 @@ classdef MLR_Transf < ssveptoolkit.featextraction.PSDExtractionBase%FeatureExtra
             labels = zeros(numTrials,1);
             
             for i = 1 : numTrials   %
+                i
                 for j=1:m
-                    data(j,:,i) = PWT.trials{i}.signal(j,:);%data(j,:,i)./norm(data(j,:,i));
+                    % 33    38    43    50    60
+                    %66    76    86   100   120
+                    %99   114   129   150   180
+                    %   132   152   172   200   240
+                    j
+                    x = PWT.trials{i}.signal(j,:);
+                    y = PWT.trials{i}.noiseSignal(j,:);
+                    load filt_IIRChebI;
+                    y = y-mean(y);
+                    y = filter(Hbp,y);
+                    fftx = abs((fft(x).^2));
+                    ffty = abs((fft(y).^2));
+                    fftxy = fftx-ffty;
+                    fftxy(fftxy<0) = 0;
+                    fftxy(1) = 0;
+                    fftxy(1:30) = 0;
+                    fftxy(240:end) = 0;
+                    y1 = real(ifft(fftxy))./1250;
+%                     y1 = x;
+                    data(j,:,i) = y1;%PWT.trials{i}.signal(j,:);%data(j,:,i)./norm(data(j,:,i));
                     data(j,:,i) = (data(j,:,i) - mean(data(j,:,i)));%./std(data(j,:,i));
                     %data(j,:,i) = data(j,:,i)./norm(data(j,:,i));
                 end%
